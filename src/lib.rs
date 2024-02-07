@@ -40,16 +40,19 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_args(args: &[String]) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn from_args(mut args: impl Iterator<Item = String>) -> Result<Self, &'static str> {
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Query string missing"),
+        };
 
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("File path missing"),
+        };
 
         let ignore_env = env::var("IGNORE_CASE").is_ok();
-        let ignore_arg = match args.get(3) {
+        let ignore_arg = match args.next() {
             Some(arg) => arg == "--ignore-case",
             None => false,
         };
